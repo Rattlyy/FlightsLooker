@@ -1,0 +1,7 @@
+GET http://localhost:8080/airports
+
+###
+GET http://localhost:8080/flights?
+    sourceAirportId=66041&
+    destinationAirportId=87384&
+    adults=1&children=0&infants=0
