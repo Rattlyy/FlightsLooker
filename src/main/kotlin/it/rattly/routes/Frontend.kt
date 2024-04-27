@@ -7,7 +7,7 @@ import io.ktor.server.resources.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import it.rattly.plugins.AirportService
-import it.rattly.plugins.ScraperService
+import it.rattly.plugins.TripService
 import java.io.File
 
 fun Application.configureFrontend() {
@@ -24,7 +24,7 @@ fun Application.configureFrontend() {
             call.respond(
                 JteContent(
                     "flightsPartial.kte", mapOf(
-                        "flights" to ScraperService.scrape(
+                        "flights" to TripService.fetchTrips(
                             AirportService.getAirports().find { it.id == req.sourceAirportId }
                                 ?: run { call.respond(HttpStatusCode.BadRequest); return@get },
                             AirportService.getAirports().find { it.id == req.destinationAirportId }

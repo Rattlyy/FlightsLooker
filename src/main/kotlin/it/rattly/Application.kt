@@ -16,8 +16,6 @@ import it.rattly.routes.configureApi
 import it.rattly.routes.configureFrontend
 import kotlinx.serialization.json.Json
 import org.slf4j.event.Level
-import kotlin.math.pow
-import kotlin.math.roundToInt
 
 fun main() {
     embeddedServer(CIO, port = 8080, host = "0.0.0.0", module = Application::module)
@@ -25,14 +23,18 @@ fun main() {
 }
 
 fun Application.module() {
+    // for HMR
     install(SSE)
+    // for typesafe requests
     install(Resources)
+    // debugging
     install(CallLogging) {
         level = Level.INFO
         filter { call -> call.request.path().startsWith("/") }
         callIdMdc("call-id")
     }
 
+    // debugging
     install(CallId) {
         header(HttpHeaders.XRequestId)
         verify { callId: String ->
@@ -40,10 +42,12 @@ fun Application.module() {
         }
     }
 
+    // to return json responses
     install(ContentNegotiation) {
         json(json)
     }
 
+//    library doesn't work with ktor 3 yet
 //    install(SimpleCache) {
 //        memoryCache {
 //            invalidateAt = 10.seconds
@@ -60,8 +64,4 @@ val json = Json {
     encodeDefaults = true
     prettyPrint = true
     isLenient = true
-}
-
-fun Double.round(digits: Int): Double {
-    return (this * 10.0.pow(digits)).roundToInt() / 10.0.pow(digits)
 }

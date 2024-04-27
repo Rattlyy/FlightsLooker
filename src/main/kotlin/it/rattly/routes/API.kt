@@ -7,7 +7,7 @@ import io.ktor.server.resources.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import it.rattly.plugins.AirportService
-import it.rattly.plugins.ScraperService
+import it.rattly.plugins.TripService
 import kotlinx.serialization.Serializable
 
 fun Application.configureApi() {
@@ -15,7 +15,7 @@ fun Application.configureApi() {
         route("/api") {
             get<FlightsRequest> { req ->
                 call.respond(
-                    ScraperService.scrape(
+                    TripService.fetchTrips(
                         AirportService.getAirports().find { it.id == req.sourceAirportId }
                             ?: run { call.respond(HttpStatusCode.BadRequest); return@get },
                         AirportService.getAirports().find { it.id == req.destinationAirportId }

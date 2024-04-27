@@ -1,7 +1,6 @@
 package it.rattly.plugins
 
 import io.ktor.http.*
-import it.rattly.round
 import it.skrape.core.document
 import it.skrape.fetcher.AsyncFetcher
 import it.skrape.fetcher.response
@@ -12,15 +11,17 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import java.io.File
 import java.util.*
+import kotlin.math.pow
+import kotlin.math.roundToInt
 
-object ScraperService {
-    suspend fun scrape(
+object TripService {
+    suspend fun fetchTrips(
         sourceAirport: Airport = Airport("Bari", "BRI", listOf("BDS")),
         destinationAirport: Airport = Airport("Anywhere", "XXX"),
         adults: Int,
         children: Int,
         infants: Int,
-    ) = skrape(AsyncFetcher) {
+    ) = skrape(AsyncFetcher /* uses coroutines */) {
         request {
             url = buildURL(sourceAirport, destinationAirport, adults, children, infants)
             timeout = 60 * 1000
@@ -32,6 +33,7 @@ object ScraperService {
                 File("scraped.html").writeText(document.toString())
             }
 
+            // scraped from azair's website, idk how it works but it works
             document.findAll("#reslist").first().children.filter { it.classNames.contains("result") }
                 .forEach { res ->
                     val find = { className: String -> res.findAll(".$className").map { it.ownText } }
@@ -77,7 +79,8 @@ object ScraperService {
 
                                 bookUrls = mutableListOf<String>().apply {
                                     res.findAll("a").map { it -> it.eachHref.filter { it.contains("book") } }
-                                        .filterNot { it.isEmpty() }.forEach { this@apply.addAll(it.map { "https://azair.eu/$it" }) }
+                                        .filterNot { it.isEmpty() }
+                                        .forEach { this@apply.addAll(it.map { "https://azair.eu/$it" }) }
                                 }
                             )
                         )
@@ -101,11 +104,11 @@ object ScraperService {
         val year = Calendar.getInstance().get(Calendar.YEAR)
         val yearNew = Calendar.getInstance().get(Calendar.YEAR) + 1
 
-        // https://www.azair.eu/azfin.php?searchtype=flexi&tp=0&isOneway=return&srcAirport=Perugia [PEG] (+AOI,CIA,FCO,PSR)&srcap0=AOI&srcap4=CIA&srcap5=FCO&srcap6=PSR&srcFreeAirport=&srcTypedText=pra&srcFreeTypedText=&srcMC=&dstAirport=Milan [MXP] (+LIN,BGY)&dstap0=LIN&dstap1=BGY&dstFreeAirport=&dstTypedText=mil&dstFreeTypedText=&dstMC=MIL_ALL&depmonth=202404&depdate=2024-04-25&aid=0&arrmonth=202503&arrdate=2025-03-02&minDaysStay=5&maxDaysStay=8&dep0=true&dep1=true&dep2=true&dep3=true&dep4=true&dep5=true&dep6=true&arr0=true&arr1=true&arr2=true&arr3=true&arr4=true&arr5=true&arr6=true&samedep=true&samearr=true&minHourStay=0:45&maxHourStay=23:20&minHourOutbound=0:00&maxHourOutbound=24:00&minHourInbound=0:00&maxHourInbound=24:00&autoprice=true&adults=1&children=0&infants=0&maxChng=1&currency=EUR&lang=en&indexSubmit=Search
         return URLBuilder(
             host = "www.azair.eu",
             protocol = URLProtocol.HTTPS,
         ).apply {
+            // scraped from azair's website, idk how it works but it works
             path("azfin.php")
             parameters["tp"] = "0"
             parameters["searchtype"] = "flexi"
@@ -194,3 +197,7 @@ data class Flight(
     val companyIata: String,
     val cheapSeats: String
 )
+
+fun Double.round(digits: Int): Double {
+    return (this * 10.0.pow(digits)).roundToInt() / 10.0.pow(digits)
+}

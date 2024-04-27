@@ -17,6 +17,7 @@ fun Application.configureJte() {
     val watcher = DirectoryWatcher(templateEngine, resolver)
     var shouldReload = false
 
+    // starts the watcher that set the shouldReload flag to true if the template file changes
     watcher.start {
         shouldReload = true
     }
@@ -26,6 +27,7 @@ fun Application.configureJte() {
     }
 
     routing {
+        // sends the hmr signal to the client, so that it can reload the webpage
         sse("/hmr") {
             while (!shouldReload) {
                 delay(100)

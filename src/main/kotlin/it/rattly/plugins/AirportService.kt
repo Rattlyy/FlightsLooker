@@ -38,6 +38,7 @@ object AirportService {
 
     suspend fun getByCode(code: String) = getAirports().find { it.code == code }
 
+    // hits cache if possible, otherwise fetches from the server
     suspend fun getAirports() =
         if (System.currentTimeMillis() - cache.lastUpdate > 1.days.inWholeMilliseconds && !currentlyFetching) {
             currentlyFetching = true
@@ -47,11 +48,13 @@ object AirportService {
             cache.airports
         } else cache.airports
 
+    // tries to get the cache stored in the disk and returns it if it exists, otherwise returns an empty cache
     private fun fetchCacheFromFile(): AirportCache =
         if (cacheFile.exists())
             json.decodeFromStream<AirportCache>(cacheFile.inputStream())
         else AirportCache(emptyList(), 0)
 
+    // fetches the airports from the server and returns them
     private suspend fun fetchAirports() = withContext(Dispatchers.IO) {
         "https://static2.azair.us/www-azair-eu-assets/js/airports_array.js?1713856204"
             .httpGet().suspendable().awaitResponseResult(StringDeserializer()).third.getOrNull()
