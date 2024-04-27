@@ -43,6 +43,8 @@ object ScraperService {
                     val duration = find("durcha")
                     val priceForSepFl = find("legPrice")
                     val seatsForGivenPrice = find("icoSeatWrapper")
+                    val airlineIata = res.findAll(".airline")
+                        .map { it.classNames.filterNot { it.contains("airline") }.first().replace("iata", "") }
 
                     try {
                         list.add(
@@ -55,6 +57,7 @@ object ScraperService {
                                     arrivalTime = deptTime[3],
                                     duration = duration[0],
                                     company = airlines[0],
+                                    companyIata = airlineIata[0],
                                     price = priceForSepFl[0].replace("€", "").toDouble().round(2),
                                     cheapSeats = seatsForGivenPrice[0],
                                 ),
@@ -66,6 +69,7 @@ object ScraperService {
                                     departureTime = arrTime[0],
                                     arrivalTime = arrTime[2],
                                     company = airlines[1],
+                                    companyIata = airlineIata[1],
                                     price = priceForSepFl[1].replace("€", "").toDouble().round(2),
                                     duration = duration[1],
                                     cheapSeats = seatsForGivenPrice[1]
@@ -73,7 +77,7 @@ object ScraperService {
 
                                 bookUrls = mutableListOf<String>().apply {
                                     res.findAll("a").map { it -> it.eachHref.filter { it.contains("book") } }
-                                        .filterNot { it.isEmpty() }.forEach { this@apply.addAll(it) }
+                                        .filterNot { it.isEmpty() }.forEach { this@apply.addAll(it.map { "https://azair.eu/$it" }) }
                                 }
                             )
                         )
@@ -187,5 +191,6 @@ data class Flight(
     val duration: String,
     val price: Double,
     val company: String,
+    val companyIata: String,
     val cheapSeats: String
 )

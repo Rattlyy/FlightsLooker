@@ -64,7 +64,7 @@ object AirportService {
             ?.split("\n")
             ?.filterNot { it.isBlank() }
             ?.map { it.split(":") }
-            ?.map { Airport(it[1], it[0]) }
+            ?.map { Airport(it[1].replace("(", " ("), it[0]) }
             ?: listOf(Airport("Bari", "BRI", listOf("BDS")), Airport("Anywhere", "XXX"))
     }
 

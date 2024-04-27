@@ -1,29 +1,28 @@
 @import it.rattly.plugins.Trip
 @param flights: List<Trip>
-<!-- make a list of cards that display the flights, with the price and the book button -->
+
 <div class="row">
-    @for (flight in flights)
+    @for (flight in flights.sortedBy { it.totalPrice })
         <div class="col">
-            <!-- make the card horizontal -->
             <div class="card" style="width: 18rem;">
                 <div class="card-body">
 
-                    <h5 class="card-title">${flight.departure.sourceAirport.name} - ${flight.departure.destinationAirport.name}</h5>
+                    <h3 class="card-title">${flight.departure.sourceAirport.name} - ${flight.departure.destinationAirport.name}</h3>
                     <p class="card-text">${flight.departure.date}</p>
                     <p class="card-text">${flight.departure.duration}</p>
                     <p class="card-text">${flight.departure.price}</p>
-                    <p class="card-text">${flight.departure.company}</p>
+                    <p class="card-text iata${flight.departure.companyIata} iata">${flight.departure.company}</p>
                     <p class="card-text">${flight.departure.cheapSeats}</p>
 
-                    <h5 class="card-title">${flight.arrival.sourceAirport.name} - ${flight.arrival.destinationAirport.name}</h5>
+                    <h3 class="card-title">${flight.arrival.sourceAirport.name} - ${flight.arrival.destinationAirport.name}</h3>
                     <p class="card-text">${flight.arrival.date}</p>
                     <p class="card-text">${flight.arrival.duration}</p>
                     <p class="card-text">${flight.arrival.price}</p>
-                    <p class="card-text">${flight.arrival.company}</p>
+                    <p class="card-text iata${flight.arrival.companyIata} iata">${flight.arrival.company}</p>
                     <p class="card-text">${flight.arrival.cheapSeats}</p>
 
                     <h5 class="card-title">Total Price</h5>
-                    <p class="card-text">${flight.totalPrice}</p>
+                    <p class="card-text" style="font-size: 3rem; font-weight: bold;">${flight.totalPrice}€</p>
 
                     <a href="${flight.bookUrls.first()}" class="btn btn-primary">Book</a>
                 </div>

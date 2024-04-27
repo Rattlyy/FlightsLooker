@@ -121,5 +121,11 @@
         .htmx-request .htmx-indicator {
             opacity: 1
         }
+
+        .iata {
+            background-repeat: no-repeat;
+            background-position: left;
+            padding-left: 20px;
+        }
     </style>
 `)
