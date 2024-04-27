@@ -1,0 +1,125 @@
+@import it.rattly.plugins.Airport
+@import it.rattly.plugins.AIRPORT_ANYWHERE
+@param airports: List<Airport>
+@template.layouts.layout("Azair", content = @`
+    <form id="searchForm" hx-get="/flights" hx-target="#results" hx-indicator="#loading">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="departureAirport">Departure Airport</label>
+                    <select class="form-control" id="departureAirport" name="sourceAirportId" form="searchForm">
+                        @for (airport in airports.sortedBy { it.toString() }.filter { it != AIRPORT_ANYWHERE })
+                            <option value="${airport.id}">${airport.toString()}</option>
+                        @endfor
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="arrivalAirport">Arrival Airport</label>
+                    <select class="form-control" id="arrivalAirport" name="destinationAirportId" form="searchForm">
+                        @for (airport in airports.sortedBy { it.toString() }.filter { it != AIRPORT_ANYWHERE })
+                            <option value="${airport.id}">${airport.toString()}</option>
+                            <option value="${AIRPORT_ANYWHERE.id}" hidden>${AIRPORT_ANYWHERE.toString()}</option>
+                        @endfor
+                    </select>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="" id="anywhere">
+                        <label class="form-check-label" for="anywhere">Anywhere</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="adults">Adults</label>
+                        <input type="number" class="form-control" id="adults" name="adults" form="searchForm" value="1">
+                    </div>
+                </div>
+
+                <div class="col">
+                    <div class="form-group">
+                        <label for="children">Children</label>
+                        <input type="number" class="form-control" id="children" name="children" form="searchForm"
+                               value="0">
+                    </div>
+                </div>
+
+                <div class="col">
+                    <div class="form-group">
+                        <label for="infants">Infants</label>
+                        <input type="number" class="form-control" id="infants" name="infants" form="searchForm"
+                               value="0">
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-12">
+                <input type="submit" class="btn btn-primary" value="Search">
+            </div>
+        </div>
+    </form>
+
+    <div id="loading" class="text-center htmx-indicator">
+        <div class="spinner-border" role="status">
+        </div>
+    </div>
+
+    <div id="results">
+        <!-- results will be injected here -->
+    </div>
+
+    <script>
+        let previousValue = ""
+        const doc = document.querySelector("#arrivalAirport")
+        const anywhere = document.querySelector("#anywhere")
+        anywhere.addEventListener("change", function () {
+            if (anywhere.checked) {
+                previousValue = doc.value
+                doc.value = "${AIRPORT_ANYWHERE.id}"
+                doc.disabled = true
+                makeFakeInput()
+            } else {
+                doc.value = previousValue
+                doc.disabled = false
+                document.querySelector("#fakeInput").remove()
+            }
+        })
+
+        document.onreadystatechange = function () {
+            if (document.readyState === "complete") {
+                if (anywhere.checked) {
+                    previousValue = doc.value
+                    doc.value = "${AIRPORT_ANYWHERE.id}"
+                    doc.disabled = true
+                    makeFakeInput()
+                }
+            }
+        }
+
+        function makeFakeInput() {
+            const fakeInput = document.createElement("input")
+            fakeInput.type = "text"
+            fakeInput.value = "${AIRPORT_ANYWHERE.id}"
+            fakeInput.name = "destinationAirportId"
+            fakeInput.form = document.querySelector("form")
+            fakeInput.id = "fakeInput"
+            fakeInput.style.display = "none"
+
+            doc.parentNode.insertBefore(fakeInput, doc)
+        }
+    </script>
+`, style = @`
+    <style>
+        .htmx-indicator {
+            opacity: 0;
+            transition: opacity 500ms ease-in;
+        }
+
+        .htmx-request .htmx-indicator {
+            opacity: 1
+        }
+    </style>
+`)

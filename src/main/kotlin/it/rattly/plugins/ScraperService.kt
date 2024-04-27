@@ -1,31 +1,26 @@
-package it.rattly
+package it.rattly.plugins
 
-import com.github.kittinunf.fuel.core.awaitResponseResult
-import com.github.kittinunf.fuel.core.deserializers.StringDeserializer
-import com.github.kittinunf.fuel.core.requests.suspendable
-import com.github.kittinunf.fuel.httpGet
-import com.github.kittinunf.result.getOrNull
 import io.ktor.http.*
+import it.rattly.round
 import it.skrape.core.document
-import it.skrape.fetcher.HttpFetcher
+import it.skrape.fetcher.AsyncFetcher
 import it.skrape.fetcher.response
 import it.skrape.fetcher.skrape
-import kotlinx.serialization.KSerializer
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.descriptors.PrimitiveKind
-import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
-import kotlinx.serialization.encoding.Decoder
-import kotlinx.serialization.encoding.Encoder
+import java.io.File
 import java.util.*
 
 object ScraperService {
-    fun scrape(
+    suspend fun scrape(
         sourceAirport: Airport = Airport("Bari", "BRI", listOf("BDS")),
         destinationAirport: Airport = Airport("Anywhere", "XXX"),
         adults: Int,
         children: Int,
         infants: Int,
-    ) = skrape(HttpFetcher) {
+    ) = skrape(AsyncFetcher) {
         request {
             url = buildURL(sourceAirport, destinationAirport, adults, children, infants)
             timeout = 60 * 1000
@@ -33,8 +28,9 @@ object ScraperService {
 
         response {
             val list = mutableListOf<Trip>()
-
-            //Files.write(Path.of("scraped.html"), document.toString().toByteArray())
+            CoroutineScope(Dispatchers.IO).launch {
+                File("scraped.html").writeText(document.toString())
+            }
 
             document.findAll("#reslist").first().children.filter { it.classNames.contains("result") }
                 .forEach { res ->
@@ -53,8 +49,8 @@ object ScraperService {
                             Trip(
                                 departure = Flight(
                                     date = deptDate[0],
-                                    sourceAirport = aerCode[0],
-                                    destinationAirport = aerCode[1],
+                                    sourceAirport = AirportService.getByCode(aerCode[0]) ?: AIRPORT_ANYWHERE,
+                                    destinationAirport = AirportService.getByCode(aerCode[1]) ?: AIRPORT_ANYWHERE,
                                     departureTime = deptTime[1],
                                     arrivalTime = deptTime[3],
                                     duration = duration[0],
@@ -63,10 +59,10 @@ object ScraperService {
                                     cheapSeats = seatsForGivenPrice[0],
                                 ),
 
-                                `return` = Flight(
+                                arrival = Flight(
                                     date = deptDate[1],
-                                    sourceAirport = aerCode[4],
-                                    destinationAirport = aerCode[5],
+                                    sourceAirport = AirportService.getByCode(aerCode[4]) ?: AIRPORT_ANYWHERE,
+                                    destinationAirport = AirportService.getByCode(aerCode[5]) ?: AIRPORT_ANYWHERE,
                                     departureTime = arrTime[0],
                                     arrivalTime = arrTime[2],
                                     company = airlines[1],
@@ -88,20 +84,6 @@ object ScraperService {
             return@response list
         }
     }
-
-    suspend fun getAirports() =
-        "https://static2.azair.us/www-azair-eu-assets/js/airports_array.js?1713856204"
-            .httpGet().suspendable().awaitResponseResult(StringDeserializer()).third.getOrNull()
-            ?.split("var airportsArray = ")?.get(1)
-            ?.split(";")?.get(0)
-            ?.replace("{", "")?.replace("}", "")
-            ?.replace("\"", "")
-            ?.replace(" ", "")
-            ?.replace(",", "")
-            ?.split("\n")
-            ?.filterNot { it.isBlank() }
-            ?.map { it.split(":") }
-            ?.map { Airport(it[1], it[0]) }
 
     private fun buildURL(
         sourceAirport: Airport = Airport("Bari", "BRI", listOf("BDS")),
@@ -188,29 +170,17 @@ object ScraperService {
 }
 
 @Serializable
-data class Airport(
-    val name: String,
-    val code: String,
-    val additionals: List<String> = emptyList(),
-    val id: Int = code.hashCode()
-) {
-
-    override fun toString() =
-        "${name.capitalize()} [${code}]" + (if (additionals.isNotEmpty()) " +(${additionals.joinToString(",")})" else "")
-}
-
-@Serializable
 data class Trip(
     val departure: Flight,
-    val `return`: Flight,
-    val totalPrice: Double = (departure.price + `return`.price).round(2),
+    val arrival: Flight,
+    val totalPrice: Double = (departure.price + arrival.price).round(2),
     val bookUrls: List<String>
 )
 
 @Serializable
 data class Flight(
-    val sourceAirport: String,
-    val destinationAirport: String,
+    val sourceAirport: Airport,
+    val destinationAirport: Airport,
     val departureTime: String,
     val arrivalTime: String,
     val date: String,
@@ -219,15 +189,3 @@ data class Flight(
     val company: String,
     val cheapSeats: String
 )
-
-object UUIDSerializer : KSerializer<UUID> {
-    override val descriptor = PrimitiveSerialDescriptor("UUID", PrimitiveKind.STRING)
-
-    override fun deserialize(decoder: Decoder): UUID {
-        return UUID.fromString(decoder.decodeString())
-    }
-
-    override fun serialize(encoder: Encoder, value: UUID) {
-        encoder.encodeString(value.toString())
-    }
-}
