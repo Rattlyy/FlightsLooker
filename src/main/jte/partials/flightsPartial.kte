@@ -1,0 +1,56 @@
+@import io.ktor.util.*
+@import it.rattly.plugins.Trip
+@param flights: List<Trip>
+
+<div class="row" style="margin-left: 1rem; margin-right: 1rem">
+    @for (flight in flights.sortedBy { it.totalPrice })
+        <div class="col g-1 gy-4">
+            <div class="card" style="width: 18rem;">
+                <div class="card-body">
+
+                    <h3 class="card-title">${flight.departure.sourceAirport.name}
+                        - ${flight.departure.destinationAirport.name}</h3>
+                    <p class="card-text">${flight.departure.date}</p>
+                    <p class="card-text">${flight.departure.duration}</p>
+                    <p class="card-text">${flight.departure.price}</p>
+                    <p class="card-text iata${flight.departure.companyIata} iata">${flight.departure.company}</p>
+                    <p class="card-text">${flight.departure.cheapSeats}</p>
+
+                    <h3 class="card-title">${flight.arrival.sourceAirport.name}
+                        - ${flight.arrival.destinationAirport.name}</h3>
+                    <p class="card-text">${flight.arrival.date}</p>
+                    <p class="card-text">${flight.arrival.duration}</p>
+                    <p class="card-text">${flight.arrival.price}</p>
+                    <p class="card-text iata${flight.arrival.companyIata} iata">${flight.arrival.company}</p>
+                    <p class="card-text">${flight.arrival.cheapSeats}</p>
+
+                    <h5 class="card-title">Total Price</h5>
+                    <p class="card-text" style="font-size: 3rem; font-weight: bold;">${flight.totalPrice}€</p>
+
+                    <!-- book button that opens a dropdown with all the available urls -->
+                    <div class="dropdown">
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                            Book
+                        </button>
+
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            @for ((urls, description) in flight.bookUrls)
+                                @for (url in urls)
+                                    <li>
+                                        <a class="dropdown-item" href="/doBooking?url=${url.encodeBase64()}"
+                                           target="_blank">${description}</a>
+                                    </li>
+                                @endfor
+                            @endfor
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endfor
+</div>
+
+<script>
+    $('.is-invalid').removeClass('is-invalid');
+</script>

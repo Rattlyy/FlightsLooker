@@ -88,5 +88,5 @@ data class Airport(
     val id: Int = code.hashCode()
 ) {
     override fun toString() =
-        "${name.capitalize()} [${code}]" + (if (additionals.isNotEmpty()) " +(${additionals.joinToString(",")})" else "")
+        "${name.capitalize()} [${code}]" + (if (additionals.isNotEmpty()) " (+${additionals.joinToString(",")})" else "")
 }

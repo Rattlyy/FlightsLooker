@@ -3,11 +3,13 @@
 @param airports: List<Airport>
 @template.layouts.layout("Azair", content = @`
     <form id="searchForm" hx-get="/flights" hx-target="#results" hx-indicator="#loading">
-        <div class="row">
-            <div class="col-md-6">
+        <div class="row" style="margin: 1rem; border: 1px solid #ccc; border-radius: 0.5rem">
+            !{val marginSpace = "1rem"}
+            <div class="col-md-6" style="margin-top: ${marginSpace}">
                 <div class="form-group">
                     <label for="departureAirport">Departure Airport</label>
-                    <select class="form-control" id="departureAirport" name="sourceAirportId" form="searchForm">
+                    <select multiple="multiple" class="form-control" id="departureAirport" name="sourceAirportId"
+                            form="searchForm">
                         @for (airport in airports.sortedBy { it.toString() }.filter { it != AIRPORT_ANYWHERE })
                             <option value="${airport.id}">${airport.toString()}</option>
                         @endfor
@@ -15,13 +17,13 @@
                 </div>
             </div>
 
-            <div class="col-md-6">
+            <div class="col-md-6" style="margin-top: ${marginSpace}">
                 <div class="form-group">
                     <label for="arrivalAirport">Arrival Airport</label>
-                    <select class="form-control" id="arrivalAirport" name="destinationAirportId" form="searchForm">
+                    <select multiple="multiple" class="form-control" id="arrivalAirport" name="destinationAirportId"
+                            form="searchForm">
                         @for (airport in airports.sortedBy { it.toString() }.filter { it != AIRPORT_ANYWHERE })
                             <option value="${airport.id}">${airport.toString()}</option>
-                            <option value="${AIRPORT_ANYWHERE.id}" hidden>${AIRPORT_ANYWHERE.toString()}</option>
                         @endfor
                     </select>
                     <div class="form-check">
@@ -35,7 +37,8 @@
                 <div class="col">
                     <div class="form-group">
                         <label for="adults">Adults</label>
-                        <input type="number" class="form-control" id="adults" name="adults" form="searchForm" value="1">
+                        <input type="number" class="form-control" id="adults" name="adults" form="searchForm"
+                               value="1">
                     </div>
                 </div>
 
@@ -56,8 +59,8 @@
                 </div>
             </div>
 
-            <div class="col-md-12">
-                <input type="submit" class="btn btn-primary" value="Search">
+            <div class="col-md-12" style="margin-bottom: ${marginSpace}">
+                <input type="submit" class="btn btn-primary" value="Search" style="width: 100%; margin-top: 2.5rem">
             </div>
         </div>
     </form>
@@ -72,32 +75,37 @@
     </div>
 
     <script>
-        let previousValue = ""
-        const doc = document.querySelector("#arrivalAirport")
+        const arrivalAirport = document.querySelector("#arrivalAirport")
+        const departureAirport = document.querySelector("#departureAirport")
         const anywhere = document.querySelector("#anywhere")
+
         anywhere.addEventListener("change", function () {
             if (anywhere.checked) {
-                previousValue = doc.value
-                doc.value = "${AIRPORT_ANYWHERE.id}"
-                doc.disabled = true
+                arrivalAirport.disabled = true
                 makeFakeInput()
             } else {
-                doc.value = previousValue
-                doc.disabled = false
+                arrivalAirport.disabled = false
                 document.querySelector("#fakeInput").remove()
             }
-        })
+        });
 
         document.onreadystatechange = function () {
-            if (document.readyState === "complete") {
-                if (anywhere.checked) {
-                    previousValue = doc.value
-                    doc.value = "${AIRPORT_ANYWHERE.id}"
-                    doc.disabled = true
-                    makeFakeInput()
-                }
+            if (document.readyState !== "complete") return
+            if (anywhere.checked) {
+                arrivalAirport.disabled = true
+                makeFakeInput()
             }
         }
+
+        $(document).ready(function () {
+            $("#arrivalAirport").select2({
+                theme: 'bootstrap-5'
+            })
+
+            $("#departureAirport").select2({
+                theme: 'bootstrap-5'
+            })
+        });
 
         function makeFakeInput() {
             const fakeInput = document.createElement("input")
@@ -108,10 +116,10 @@
             fakeInput.id = "fakeInput"
             fakeInput.style.display = "none"
 
-            doc.parentNode.insertBefore(fakeInput, doc)
+            arrivalAirport.parentNode.insertBefore(fakeInput, arrivalAirport)
         }
     </script>
-`, style = @`
+`, additionalHead = @`
     <style>
         .htmx-indicator {
             opacity: 0;
@@ -126,6 +134,18 @@
             background-repeat: no-repeat;
             background-position: left;
             padding-left: 20px;
+        }
+
+        .was-validated .custom-select:invalid + .select2 .select2-selection {
+            border-color: var(--bs-danger) !important;
+        }
+
+        .was-validated .custom-select:valid + .select2 .select2-selection {
+            border-color: var(--bs-success) !important;
+        }
+
+        *:focus {
+            outline: 0px;
         }
     </style>
 `)

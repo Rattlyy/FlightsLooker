@@ -1,0 +1,20 @@
+@param invalidFields: List<String>?
+@param error: String
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <div class="alert alert-danger" role="alert">
+                <h4 class="alert-heading">Error</h4>
+                <p>${error}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (invalidFields != null)
+<script>
+    @for (field in invalidFields)
+    $("[name='${field}']").addClass("is-invalid")
+    @endfor
+</script>
+@endif

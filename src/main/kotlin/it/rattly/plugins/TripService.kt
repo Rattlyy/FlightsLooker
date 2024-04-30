@@ -77,11 +77,19 @@ object TripService {
                                     cheapSeats = seatsForGivenPrice[1]
                                 ),
 
-                                bookUrls = mutableListOf<String>().apply {
-                                    res.findAll("a").map { it -> it.eachHref.filter { it.contains("book") } }
-                                        .filterNot { it.isEmpty() }
-                                        .forEach { this@apply.addAll(it.map { "https://azair.eu/$it" }) }
-                                }
+                                bookUrls = res.findAll("a").map { it ->
+                                    it.eachHref.filter { it.contains("book") } to (
+                                            it.attributes["onclick"]
+                                                ?.replace("trackBook('", "")
+                                                ?.replace("')", "")
+                                                ?.replace(",'", ",")
+                                                ?.split("',")
+                                                ?.filter { it.toIntOrNull() == null }
+                                                ?.mapNotNull { AirportService.getByCode(it) }
+                                                ?.joinToString(" -> ")
+                                                ?: ""
+                                    )
+                                }.filterNot { it.first.isEmpty() }.distinct().toMap()
                             )
                         )
                     } catch (e: Exception) {
@@ -181,7 +189,7 @@ data class Trip(
     val departure: Flight,
     val arrival: Flight,
     val totalPrice: Double = (departure.price + arrival.price).round(2),
-    val bookUrls: List<String>
+    val bookUrls: Map<List<String>, String>
 )
 
 @Serializable
