@@ -45,6 +45,9 @@ object TripService {
                     val duration = find("durcha")
                     val priceForSepFl = find("legPrice")
                     val seatsForGivenPrice = find("icoSeatWrapper")
+                    val lengthOfStay = find("lengthOfStay").first().replace("Length of stay: ", "").replace(" days", "")
+                        .replace(" day", "").run { return@run if (this == "days") 1 else this.toInt() }
+
                     val airlineIata = res.findAll(".airline")
                         .map { it.classNames.filterNot { it.contains("airline") }.first().replace("iata", "") }
 
@@ -77,6 +80,7 @@ object TripService {
                                     cheapSeats = seatsForGivenPrice[1]
                                 ),
 
+                                lengthOfStay = lengthOfStay,
                                 bookUrls = res.findAll("a").map { it ->
                                     it.eachHref.filter { it.contains("book") } to (
                                             it.attributes["onclick"]
@@ -88,7 +92,7 @@ object TripService {
                                                 ?.mapNotNull { AirportService.getByCode(it) }
                                                 ?.joinToString(" -> ")
                                                 ?: ""
-                                    )
+                                            )
                                 }.filterNot { it.first.isEmpty() }.distinct().toMap()
                             )
                         )
@@ -184,10 +188,46 @@ object TripService {
     }
 }
 
+val PLACEHOLDER_TRIP = Trip(
+    departure = Flight(
+        date = "2023-01-01",
+        sourceAirport = AIRPORT_ANYWHERE,
+        destinationAirport = AIRPORT_ANYWHERE,
+        departureTime = "10:00",
+        arrivalTime = "10:00",
+        duration = "1",
+        price = 1.00,
+        company = "Ryanair",
+        companyIata = "FR",
+        cheapSeats = "1"
+    ),
+    arrival = Flight(
+        date = "2023-01-01",
+        sourceAirport = AIRPORT_ANYWHERE,
+        destinationAirport = AIRPORT_ANYWHERE,
+        departureTime = "10:00",
+        arrivalTime = "10:00",
+        duration = "1",
+        price = 1.00,
+        company = "Ryanair",
+        companyIata = "FR",
+        cheapSeats = "1"
+    ),
+    bookUrls = mapOf(
+        listOf("test") to "https://example.com",
+        listOf("test") to "https://example.com",
+        listOf("test") to "https://example.com",
+        listOf("test") to "https://example.com",
+    ),
+
+    lengthOfStay = 1
+)
+
 @Serializable
 data class Trip(
     val departure: Flight,
     val arrival: Flight,
+    val lengthOfStay: Int,
     val totalPrice: Double = (departure.price + arrival.price).round(2),
     val bookUrls: Map<List<String>, String>
 )

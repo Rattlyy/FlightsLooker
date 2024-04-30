@@ -7,9 +7,8 @@ import io.ktor.server.resources.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.util.*
-import it.rattly.plugins.AIRPORT_ANYWHERE
 import it.rattly.plugins.AirportService
-import it.rattly.plugins.Flight
+import it.rattly.plugins.PLACEHOLDER_TRIP
 import it.rattly.plugins.Trip
 import it.skrape.core.document
 import it.skrape.fetcher.AsyncFetcher
@@ -68,40 +67,7 @@ fun Application.configureFrontend() {
                     "partials/flightsPartial.kte", mapOf(
                         "flights" to mutableListOf<Trip>().apply {
                             repeat(100) {
-                                add(
-                                    Trip(
-                                        departure = Flight(
-                                            date = "2023-01-01",
-                                            sourceAirport = AIRPORT_ANYWHERE,
-                                            destinationAirport = AIRPORT_ANYWHERE,
-                                            departureTime = "10:00",
-                                            arrivalTime = "10:00",
-                                            duration = "1",
-                                            price = 1.00,
-                                            company = "Ryanair",
-                                            companyIata = "FR",
-                                            cheapSeats = "1"
-                                        ),
-                                        arrival = Flight(
-                                            date = "2023-01-01",
-                                            sourceAirport = AIRPORT_ANYWHERE,
-                                            destinationAirport = AIRPORT_ANYWHERE,
-                                            departureTime = "10:00",
-                                            arrivalTime = "10:00",
-                                            duration = "1",
-                                            price = 1.00,
-                                            company = "Ryanair",
-                                            companyIata = "FR",
-                                            cheapSeats = "1"
-                                        ),
-                                        bookUrls = mapOf(
-                                            listOf("test") to "https://example.com",
-                                            listOf("test") to "https://example.com",
-                                            listOf("test") to "https://example.com",
-                                            listOf("test") to "https://example.com",
-                                        )
-                                    )
-                                )
+                                add(PLACEHOLDER_TRIP)
                             }
                         }
                     )
@@ -125,7 +91,11 @@ fun Application.configureFrontend() {
                 call.respond(
                     JteContent(
                         "partials/errorPartial.kte",
-                        mapOf("invalidFields" to invalidFields, "error" to "Correct the highlighted fields and try again.")
+
+                        mapOf(
+                            "invalidFields" to invalidFields,
+                            "error" to "Correct the highlighted fields and try again."
+                        )
                     )
                 )
             }
@@ -140,14 +110,20 @@ fun Application.configureFrontend() {
                         )
                     )
                 )
+
                 return@get
             }
 
             call.respond(
                 JteContent(
-                    "partials/flightsPartial.kte", mapOf(
-                        "flights" to trips
-                    )
+                    "partials/flightsPartial.kte",
+                    mapOf("flights" to when (call.request.queryParameters["sorting"]) {
+                        "price" -> trips.sortedBy { it.totalPrice }
+                        "duration" -> trips.sortedBy { it.lengthOfStay }
+                        "priceDesc" -> trips.sortedByDescending { it.totalPrice }
+                        "durationDesc" -> trips.sortedByDescending { it.lengthOfStay }
+                        else -> trips
+                    })
                 )
             )
         }

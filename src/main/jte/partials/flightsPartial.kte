@@ -3,7 +3,7 @@
 @param flights: List<Trip>
 
 <div class="row" style="margin-left: 1rem; margin-right: 1rem">
-    @for (flight in flights.sortedBy { it.totalPrice })
+    @for (flight in flights)
         <div class="col g-1 gy-4">
             <div class="card" style="width: 18rem;">
                 <div class="card-body">

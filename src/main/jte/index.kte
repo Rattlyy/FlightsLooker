@@ -1,7 +1,7 @@
 @import it.rattly.plugins.Airport
 @import it.rattly.plugins.AIRPORT_ANYWHERE
 @param airports: List<Airport>
-@template.layouts.layout("Azair", content = @`
+@template.layouts.layout("Flight Lookup", content = @`
     <form id="searchForm" hx-get="/flights" hx-target="#results" hx-indicator="#loading">
         <div class="row" style="margin: 1rem; border: 1px solid #ccc; border-radius: 0.5rem">
             !{val marginSpace = "1rem"}
@@ -60,10 +60,26 @@
             </div>
 
             <div class="col-md-12" style="margin-bottom: ${marginSpace}">
-                <input type="submit" class="btn btn-primary" value="Search" style="width: 100%; margin-top: 2.5rem">
+                <input id="submitBtn" type="submit" class="btn btn-primary" value="Search"
+                       style="width: 100%; margin-top: 2.5rem">
             </div>
         </div>
     </form>
+
+    <div class="row" style="margin: 1rem">
+        <div class="col">
+            <div class="form-group">
+                <label for="sorting">Sorting</label>
+                <select class="form-control" id="sorting" name="sorting" form="searchForm"
+                        hx-on:change="$('#submitBtn').click();">
+                    <option value="price">Price</option>
+                    <option value="duration">Number of Days</option>
+                    <option value="priceDesc">Price (descending)</option>
+                    <option value="durationDesc">Number of Days (descending)</option>
+                </select>
+            </div>
+        </div>
+    </div>
 
     <div id="loading" class="text-center htmx-indicator">
         <div class="spinner-border" role="status">
