@@ -14,7 +14,13 @@ import java.nio.file.Path
 fun Application.configureJte() {
     val resolver = DirectoryCodeResolver(Path.of("src/main/jte"))
     val templateEngine =
-        if (developmentMode) TemplateEngine.create(resolver, ContentType.Html)
+        if (developmentMode) TemplateEngine.create(
+            resolver,
+            Path.of("jte-classes"),
+            ContentType.Html,
+            Thread.currentThread().contextClassLoader
+        )
+
         else TemplateEngine.createPrecompiled(ContentType.Html)
 
     install(Jte) {
@@ -23,22 +29,26 @@ fun Application.configureJte() {
 
     if (developmentMode) {
         val watcher = DirectoryWatcher(templateEngine, resolver)
-        var shouldReload = false
+        val flags = mutableMapOf<Int, Boolean>()
 
         // starts the watcher that sets the shouldReload flag to true if the template file changes
         watcher.start {
-            shouldReload = true
+            flags.keys.forEach { flags[it] = true }
         }
 
         routing {
             // sends the hmr signal to the client, so that it can reload the webpage
             sse("/hmr") {
-                while (!shouldReload) {
+                // we use a different key for each request to avoid race conditions
+                val key = Math.random().toInt()
+                flags[key] = false
+
+                while (!flags[key]!!) {
                     delay(100)
                 }
 
                 send("hmr", "message")
-                shouldReload = false
+                flags.remove(key)
             }
         }
     }

@@ -15,9 +15,8 @@ import it.rattly.routes.configureApi
 import it.rattly.routes.configureFrontend
 import kotlinx.serialization.json.Json
 import org.slf4j.event.Level
-import kotlin.properties.Delegates
 
-var devMode by Delegates.notNull<Boolean>()
+val devMode by lazy { System.getProperty("io.ktor.development") == "true" }
 
 fun main() {
     embeddedServer(CIO, port = 8080, host = "0.0.0.0", module = Application::module)
@@ -25,36 +24,23 @@ fun main() {
 }
 
 fun Application.module() {
-    devMode = developmentMode
-
-    // for render healthcheck
+    // for render's checks
     install(AutoHeadResponse)
     // for HMR
     install(SSE)
     // for typesafe requests
     install(Resources)
-    // debugging
 
-
+    // call logging
     install(CallLogging) {
         level = Level.INFO
         filter { call -> call.request.path().startsWith("/") }
-        format { call ->
-            return@format "GET ${call.request.uri} in ${call.processingTimeMillis()}ms"
-        }
     }
 
     // to return json responses
     install(ContentNegotiation) {
         json(json)
     }
-
-//    library doesn't work with ktor 3 yet
-//    install(SimpleCache) {
-//        memoryCache {
-//            invalidateAt = 10.seconds
-//        }
-//    }
 
     configureJte()
     configureApi()

@@ -1,5 +1,6 @@
 @param invalidFields: List<String>?
 @param error: String
+
 <div class="container">
     <div class="row">
         <div class="col">
@@ -12,9 +13,9 @@
 </div>
 
 @if (invalidFields != null)
-<script>
-    @for (field in invalidFields)
-    $("[name='${field}']").addClass("is-invalid")
-    @endfor
-</script>
+    <script>
+        @for (field in invalidFields)
+        $("[name='${field}']").addClass("is-invalid")
+        @endfor
+    </script>
 @endif

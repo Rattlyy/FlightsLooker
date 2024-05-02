@@ -18,7 +18,7 @@ import it.skrape.fetcher.skrape
 fun Application.configureFrontend() {
     routing {
         get("/") {
-            call.respondTemplate("index.kte", mapOf("airports" to AirportService.getAirports()))
+            call.respondTemplate("index.kte", mapOf("airportsWithEverywhere" to AirportService.getAirports()))
         }
 
         get("/doBooking") {
@@ -69,17 +69,7 @@ fun Application.configureFrontend() {
         }
 
         get<FlightsRequest> { req ->
-            val invalidFields = mutableListOf<String>()
-
-            if (req.sourceAirportId == null) invalidFields.add("sourceAirportId")
-            if (req.destinationAirportId == null) invalidFields.add("destinationAirportId")
-            if (req.adults == null) invalidFields.add("adults")
-            if (req.children == null) invalidFields.add("children")
-            if (req.infants == null) invalidFields.add("infants")
-            if ((req.adults ?: 1) < 0) invalidFields.add("adults")
-            if ((req.children ?: 1) < 0) invalidFields.add("children")
-            if ((req.infants ?: 1) < 0) invalidFields.add("infants")
-
+            val invalidFields = req.validate()
             if (invalidFields.isNotEmpty()) {
                 call.respondTemplate(
                     "partials/errorPartial.kte",

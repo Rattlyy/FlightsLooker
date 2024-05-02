@@ -7,32 +7,34 @@ import io.ktor.server.resources.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import it.rattly.plugins.*
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.add
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.put
-import kotlinx.serialization.json.putJsonArray
+import kotlinx.serialization.json.*
 
+@OptIn(ExperimentalSerializationApi::class)
 fun Application.configureApi() {
     routing {
         route("/api") {
             get<FlightsRequest> { req ->
-                if (req.sourceAirportId == null) call.respond(
-                    HttpStatusCode.BadRequest,
-                    "The source airport id is not valid"
-                )
-                if (req.destinationAirportId == null) call.respond(
-                    HttpStatusCode.BadRequest,
-                    "The destination airport id is not valid"
-                )
-                if (req.adults == null) call.respond(HttpStatusCode.BadRequest, "The adults field is not valid")
-                if (req.children == null) call.respond(HttpStatusCode.BadRequest, "The children field is not valid")
-                if (req.infants == null) call.respond(HttpStatusCode.BadRequest, "The infants field is not valid")
-                if (call.response.status() == HttpStatusCode.BadRequest) return@get
+                val invalidFields = req.validate()
+                if (invalidFields.isNotEmpty()) {
+                    call.respond(
+                        HttpStatusCode.BadRequest,
+                        buildJsonObject {
+                            put("error", "Correct the specified fields and try again.")
+                            putJsonArray("fields") {
+                                addAll(invalidFields)
+                            }
+                        }
+                    )
+
+                    return@get
+                }
 
                 call.respond(
                     req.fetchTrips() ?: run {
                         call.respond(HttpStatusCode.BadRequest)
+
                         buildJsonObject {
                             put("error", "Bad request")
                             putJsonArray("possibleCauses") {
@@ -58,11 +60,9 @@ fun Application.configureApi() {
                 })
             }
 
-            //cacheOutput(1.days) {
             get("/airports") {
                 call.respond(AirportService.getAirports())
             }
-            //}
         }
     }
 }
@@ -70,11 +70,11 @@ fun Application.configureApi() {
 @Resource("/flights")
 @Serializable
 class FlightsRequest(
-    val sourceAirportId: List<Int>? = null,
-    val destinationAirportId: List<Int>? = null,
-    val adults: Int? = null,
-    val children: Int? = null,
-    val infants: Int? = null,
+    private val sourceAirportId: List<Int>? = null,
+    private val destinationAirportId: List<Int>? = null,
+    private val adults: Int? = null,
+    private val children: Int? = null,
+    private val infants: Int? = null,
 ) {
     suspend fun fetchTrips(): MutableList<Trip>? = runCatching {
         val sourceAirports = sourceAirportId!!.mapNotNull { id -> AirportService.getAirports().find { it.id == id } }
@@ -101,5 +101,17 @@ class FlightsRequest(
     }.getOrElse {
         it.printStackTrace()
         return null
+    }
+
+    fun validate() = mutableListOf<String>().apply {
+        if (sourceAirportId == null) add("sourceAirportId")
+        if (destinationAirportId == null) add("destinationAirportId")
+        if (adults == null) add("adults")
+        if (children == null) add("children")
+        if (infants == null) add("infants")
+
+        if ((adults ?: 1) < 0) add("adults")
+        if ((children ?: 1) < 0) add("children")
+        if ((infants ?: 1) < 0) add("infants")
     }
 }

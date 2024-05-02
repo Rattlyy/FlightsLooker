@@ -1,14 +1,14 @@
 rootProject.name = "flightslooker"
 
 pluginManagement {
-    val ktor_version: String by settings
-    val kotlin_version: String by settings
-    val jte_version: String by settings
+    val ktorVersion: String by settings
+    val kotlinVersion: String by settings
+    val jteVersion: String by settings
 
     plugins {
-        kotlin("jvm") version kotlin_version
-        id("io.ktor.plugin") version ktor_version
-        id("gg.jte.gradle") version jte_version
-        id("org.jetbrains.kotlin.plugin.serialization") version kotlin_version
+        kotlin("jvm") version kotlinVersion
+        kotlin("plugin.serialization") version kotlinVersion
+        id("io.ktor.plugin") version ktorVersion
+        id("gg.jte.gradle") version jteVersion
     }
 }

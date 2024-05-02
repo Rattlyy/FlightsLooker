@@ -1,17 +1,10 @@
 import io.ktor.plugin.features.*
 
-val ktor_version: String by project
-val kotlin_version: String by project
-val logback_version: String by project
-val jte_version: String by project
-
-// configurations.all {
-//     resolutionStrategy.eachDependency {
-//         if (requested.group == "io.ktor" && requested.name.contains("ktor-client")) {
-//             useVersion("2.3.4")
-//         }
-//     }
-// }
+val isDevelopment: Boolean = project.ext.has("development")
+val ktorVersion: String by project
+val kotlinVersion: String by project
+val logbackVersion: String by project
+val jteVersion: String by project
 
 plugins {
     kotlin("jvm")
@@ -26,9 +19,7 @@ group = "it.rattly"
 version = "0.0.1"
 
 application {
-    mainClass.set("it.rattly.ApplicationKt")
-
-    val isDevelopment: Boolean = project.ext.has("development")
+    mainClass = "it.rattly.ApplicationKt"
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
 }
 
@@ -44,30 +35,30 @@ dependencies {
     implementation("io.ktor:ktor-server-resources")
     implementation("io.ktor:ktor-server-host-common-jvm")
     implementation("io.ktor:ktor-server-call-logging-jvm")
-    implementation("io.ktor:ktor-server-call-id-jvm")
     implementation("io.ktor:ktor-server-content-negotiation-jvm")
     implementation("io.ktor:ktor-serialization-kotlinx-json-jvm")
     implementation("io.ktor:ktor-server-cio-jvm")
     implementation("io.ktor:ktor-server-jte")
     implementation("io.ktor:ktor-server-auto-head-response")
     implementation("io.ktor:ktor-server-sse-jvm")
-    implementation("ch.qos.logback:logback-classic:$logback_version")
     implementation("com.github.kittinunf.fuel:fuel:2.+")
+    implementation("ch.qos.logback:logback-classic:$logbackVersion")
+    implementation("gg.jte:jte:$jteVersion")
+    implementation("gg.jte:jte-watcher:$jteVersion")
+    implementation("gg.jte:jte-kotlin:$jteVersion")
+
     // PSA: this is a patched version of skrapeit, it's not published on maven central yet
     // TODO: https://github.com/skrapeit/skrape.it/pull/239
     // TODO: fix when jitpack fixes itself
     implementation("it.skrape:skrapeit:1.3.0-alpha.2")
-    implementation("gg.jte:jte:$jte_version")
-    implementation("gg.jte:jte-watcher:$jte_version")
-    implementation("gg.jte:jte-kotlin:$jte_version")
 }
 
 ktor {
     docker {
+        jreVersion = JavaVersion.VERSION_17
         localImageName = rootProject.name
         imageTag = "latest"
 
-        jreVersion = JavaVersion.VERSION_17
         portMappings = listOf(
             DockerPortMapping(
                 80,
@@ -87,6 +78,8 @@ ktor {
 }
 
 jte {
-    binaryStaticContent.set(true)
-    generate()
+    if (!isDevelopment) {
+        binaryStaticContent.set(true)
+        generate()
+    }
 }

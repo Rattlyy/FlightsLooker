@@ -27,7 +27,6 @@
                     <h5 class="card-title">Total Price</h5>
                     <p class="card-text" style="font-size: 3rem; font-weight: bold;">${flight.totalPrice}€</p>
 
-                    <!-- book button that opens a dropdown with all the available urls -->
                     <div class="dropdown">
                         <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton"
                                 data-bs-toggle="dropdown" aria-expanded="false">

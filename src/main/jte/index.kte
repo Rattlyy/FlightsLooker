@@ -1,16 +1,19 @@
 @import it.rattly.plugins.Airport
 @import it.rattly.plugins.AIRPORT_ANYWHERE
-@param airports: List<Airport>
-@template.layouts.layout("Flight Lookup", content = @`
+@param airportsWithEverywhere: List<Airport>
+@template.layouts.layout("FlightsLookup", content = @`
     <form id="searchForm" hx-get="/flights" hx-target="#results" hx-indicator="#loading">
         <div class="row" style="margin: 1rem; border: 1px solid #ccc; border-radius: 0.5rem">
             !{val marginSpace = "1rem"}
+            !{val airports = airportsWithEverywhere.filter { it != AIRPORT_ANYWHERE }}
+
             <div class="col-md-6" style="margin-top: ${marginSpace}">
                 <div class="form-group">
                     <label for="departureAirport">Departure Airport</label>
                     <select multiple="multiple" class="form-control" id="departureAirport" name="sourceAirportId"
                             form="searchForm">
-                        @for (airport in airports.sortedBy { it.toString() }.filter { it != AIRPORT_ANYWHERE })
+
+                        @for (airport in airports)
                             <option value="${airport.id}">${airport.toString()}</option>
                         @endfor
                     </select>
@@ -22,7 +25,8 @@
                     <label for="arrivalAirport">Arrival Airport</label>
                     <select multiple="multiple" class="form-control" id="arrivalAirport" name="destinationAirportId"
                             form="searchForm">
-                        @for (airport in airports.sortedBy { it.toString() }.filter { it != AIRPORT_ANYWHERE })
+
+                        @for (airport in airports)
                             <option value="${airport.id}">${airport.toString()}</option>
                         @endfor
                     </select>
@@ -103,17 +107,14 @@
                 arrivalAirport.disabled = false
                 document.querySelector("#fakeInput").remove()
             }
-        });
+        })
 
-        document.onreadystatechange = function () {
-            if (document.readyState !== "complete") return
+        $(document).ready(function () {
             if (anywhere.checked) {
                 arrivalAirport.disabled = true
                 makeFakeInput()
             }
-        }
 
-        $(document).ready(function () {
             $("#arrivalAirport").select2({
                 theme: 'bootstrap-5'
             })

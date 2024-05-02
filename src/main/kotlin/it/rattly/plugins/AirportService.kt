@@ -25,6 +25,7 @@ object AirportService {
     init {
         val fileCache = fetchCacheFromFile()
 
+        // if the cache file is empty or expired, fetch the data from the server
         cache = if (fileCache.lastUpdate + 1.days.inWholeMilliseconds > System.currentTimeMillis()) {
             fileCache
         } else {
@@ -68,6 +69,7 @@ object AirportService {
             ?.filterNot { it.isBlank() }
             ?.map { it.split(":") }
             ?.map { Airport(it[1].replace("(", " ("), it[0]) }
+            ?.sortedBy { it.toString() }
             ?: listOf(Airport("Bari", "BRI", listOf("BDS")), Airport("Anywhere", "XXX"))
     }
 
@@ -81,6 +83,7 @@ object AirportService {
 val AIRPORT_ANYWHERE = Airport("Anywhere", "XXX")
 
 @Serializable
+@Suppress("DEPRECATION")
 data class Airport(
     val name: String,
     val code: String,
