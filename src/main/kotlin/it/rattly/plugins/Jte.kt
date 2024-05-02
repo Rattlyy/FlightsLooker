@@ -13,28 +13,33 @@ import java.nio.file.Path
 
 fun Application.configureJte() {
     val resolver = DirectoryCodeResolver(Path.of("src/main/jte"))
-    val templateEngine = TemplateEngine.create(resolver, ContentType.Html)
-    val watcher = DirectoryWatcher(templateEngine, resolver)
-    var shouldReload = false
-
-    // starts the watcher that set the shouldReload flag to true if the template file changes
-    watcher.start {
-        shouldReload = true
-    }
+    val templateEngine =
+        if (developmentMode) TemplateEngine.create(resolver, ContentType.Html)
+        else TemplateEngine.createPrecompiled(ContentType.Html)
 
     install(Jte) {
         this.templateEngine = templateEngine
     }
 
-    routing {
-        // sends the hmr signal to the client, so that it can reload the webpage
-        sse("/hmr") {
-            while (!shouldReload) {
-                delay(100)
-            }
+    if (developmentMode) {
+        val watcher = DirectoryWatcher(templateEngine, resolver)
+        var shouldReload = false
 
-            send("hmr", "message")
-            shouldReload = false
+        // starts the watcher that sets the shouldReload flag to true if the template file changes
+        watcher.start {
+            shouldReload = true
+        }
+
+        routing {
+            // sends the hmr signal to the client, so that it can reload the webpage
+            sse("/hmr") {
+                while (!shouldReload) {
+                    delay(100)
+                }
+
+                send("hmr", "message")
+                shouldReload = false
+            }
         }
     }
 }

@@ -32,8 +32,10 @@
 </div>
 
 ${content}
+@if (it.rattly.devMode)
 <script>
     new EventSource("/hmr").onmessage = () => location.reload()
 </script>
+@endif
 </body>
 </html>

@@ -12,9 +12,10 @@ val jte_version: String by project
 // }
 
 plugins {
-    kotlin("jvm") version "1.9.23"
-    id("io.ktor.plugin") version "3.0.0-beta-1"
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.9.23"
+    kotlin("jvm")
+    id("io.ktor.plugin")
+    id("gg.jte.gradle")
+    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 group = "it.rattly"
@@ -57,4 +58,9 @@ dependencies {
     implementation("gg.jte:jte:$jte_version")
     implementation("gg.jte:jte-watcher:$jte_version")
     implementation("gg.jte:jte-kotlin:$jte_version")
+}
+
+jte {
+    binaryStaticContent = true
+    generate()
 }

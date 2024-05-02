@@ -16,6 +16,9 @@ import it.rattly.routes.configureApi
 import it.rattly.routes.configureFrontend
 import kotlinx.serialization.json.Json
 import org.slf4j.event.Level
+import kotlin.properties.Delegates
+
+var devMode by Delegates.notNull<Boolean>()
 
 fun main() {
     embeddedServer(CIO, port = 8080, host = "0.0.0.0", module = Application::module)
@@ -23,6 +26,8 @@ fun main() {
 }
 
 fun Application.module() {
+    devMode = developmentMode
+
     // for HMR
     install(SSE)
     // for typesafe requests
