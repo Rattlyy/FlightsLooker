@@ -61,6 +61,6 @@ dependencies {
 }
 
 jte {
-    binaryStaticContent = true
+    binaryStaticContent.set(true)
     generate()
 }
