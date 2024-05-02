@@ -127,5 +127,9 @@ fun Application.configureFrontend() {
                 )
             )
         }
+
+        get("/healthcheck") {
+            call.respond(HttpStatusCode.OK, "ok")
+        }
     }
 }

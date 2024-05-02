@@ -1,11 +1,10 @@
 package it.rattly
 
-import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.cio.*
 import io.ktor.server.engine.*
-import io.ktor.server.plugins.callid.*
+import io.ktor.server.plugins.autohead.*
 import io.ktor.server.plugins.callloging.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.request.*
@@ -28,22 +27,20 @@ fun main() {
 fun Application.module() {
     devMode = developmentMode
 
+    // for render healthcheck
+    install(AutoHeadResponse)
     // for HMR
     install(SSE)
     // for typesafe requests
     install(Resources)
     // debugging
+
+
     install(CallLogging) {
         level = Level.INFO
         filter { call -> call.request.path().startsWith("/") }
-        callIdMdc("call-id")
-    }
-
-    // debugging
-    install(CallId) {
-        header(HttpHeaders.XRequestId)
-        verify { callId: String ->
-            callId.isNotEmpty()
+        format { call ->
+            return@format "GET ${call.request.uri} in ${call.processingTimeMillis()}ms"
         }
     }
 

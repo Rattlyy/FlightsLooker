@@ -8,6 +8,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import it.rattly.plugins.Airport
 import it.rattly.plugins.AirportService
+import it.rattly.plugins.Trip
 import it.rattly.plugins.TripService
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.add
@@ -64,7 +65,7 @@ class FlightsRequest(
     val children: Int? = null,
     val infants: Int? = null,
 ) {
-    suspend fun fetchTrips() = runCatching {
+    suspend fun fetchTrips(): MutableList<Trip>? = runCatching {
         val sourceAirports = sourceAirportId!!.mapNotNull { id -> AirportService.getAirports().find { it.id == id } }
         val destinationAirports =
             destinationAirportId!!.mapNotNull { id -> AirportService.getAirports().find { it.id == id } }
@@ -86,5 +87,8 @@ class FlightsRequest(
             children!!,
             infants!!
         )
-    }.getOrNull()
+    }.getOrElse {
+        it.printStackTrace()
+        return null
+    }
 }

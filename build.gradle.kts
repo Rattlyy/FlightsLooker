@@ -47,6 +47,7 @@ dependencies {
     implementation("io.ktor:ktor-serialization-kotlinx-json-jvm")
     implementation("io.ktor:ktor-server-cio-jvm")
     implementation("io.ktor:ktor-server-jte")
+    implementation("io.ktor:ktor-server-auto-head-response")
     implementation("io.ktor:ktor-server-sse-jvm")
     //implementation("com.ucasoft.ktor:ktor-simple-cache:0.+")
     //implementation("com.ucasoft.ktor:ktor-simple-memory-cache:0.+")
@@ -59,6 +60,8 @@ dependencies {
     implementation("gg.jte:jte-watcher:$jte_version")
     implementation("gg.jte:jte-kotlin:$jte_version")
 }
+
+
 
 jte {
     binaryStaticContent.set(true)
