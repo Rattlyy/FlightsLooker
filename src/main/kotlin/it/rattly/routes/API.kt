@@ -6,10 +6,7 @@ import io.ktor.server.application.*
 import io.ktor.server.resources.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import it.rattly.plugins.Airport
-import it.rattly.plugins.AirportService
-import it.rattly.plugins.Trip
-import it.rattly.plugins.TripService
+import it.rattly.plugins.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonObject
@@ -20,8 +17,14 @@ fun Application.configureApi() {
     routing {
         route("/api") {
             get<FlightsRequest> { req ->
-                if (req.sourceAirportId == null) call.respond(HttpStatusCode.BadRequest, "The source airport id is not valid")
-                if (req.destinationAirportId == null) call.respond(HttpStatusCode.BadRequest, "The destination airport id is not valid")
+                if (req.sourceAirportId == null) call.respond(
+                    HttpStatusCode.BadRequest,
+                    "The source airport id is not valid"
+                )
+                if (req.destinationAirportId == null) call.respond(
+                    HttpStatusCode.BadRequest,
+                    "The destination airport id is not valid"
+                )
                 if (req.adults == null) call.respond(HttpStatusCode.BadRequest, "The adults field is not valid")
                 if (req.children == null) call.respond(HttpStatusCode.BadRequest, "The children field is not valid")
                 if (req.infants == null) call.respond(HttpStatusCode.BadRequest, "The infants field is not valid")
@@ -45,6 +48,14 @@ fun Application.configureApi() {
                         }
                     }
                 )
+            }
+
+            get("/mockFlights") {
+                call.respond(mutableListOf<Trip>().apply {
+                    repeat(100) {
+                        add(PLACEHOLDER_TRIP)
+                    }
+                })
             }
 
             //cacheOutput(1.days) {

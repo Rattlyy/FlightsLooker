@@ -14,16 +14,11 @@ import it.skrape.core.document
 import it.skrape.fetcher.AsyncFetcher
 import it.skrape.fetcher.response
 import it.skrape.fetcher.skrape
-import java.io.File
 
 fun Application.configureFrontend() {
     routing {
-        get("/scraped.html") {
-            call.respondFile(File("scraped.html"))
-        }
-
         get("/") {
-            call.respond(JteContent("index.kte", mapOf("airports" to AirportService.getAirports())))
+            call.respondTemplate("index.kte", mapOf("airports" to AirportService.getAirports()))
         }
 
         get("/doBooking") {
@@ -62,15 +57,13 @@ fun Application.configureFrontend() {
         }
 
         get("/mockFlights") {
-            call.respond(
-                JteContent(
-                    "partials/flightsPartial.kte", mapOf(
-                        "flights" to mutableListOf<Trip>().apply {
-                            repeat(100) {
-                                add(PLACEHOLDER_TRIP)
-                            }
+            call.respondTemplate(
+                "partials/flightsPartial.kte", mapOf(
+                    "flights" to mutableListOf<Trip>().apply {
+                        repeat(100) {
+                            add(PLACEHOLDER_TRIP)
                         }
-                    )
+                    }
                 )
             )
         }
@@ -88,43 +81,39 @@ fun Application.configureFrontend() {
             if ((req.infants ?: 1) < 0) invalidFields.add("infants")
 
             if (invalidFields.isNotEmpty()) {
-                call.respond(
-                    JteContent(
-                        "partials/errorPartial.kte",
+                call.respondTemplate(
+                    "partials/errorPartial.kte",
 
-                        mapOf(
-                            "invalidFields" to invalidFields,
-                            "error" to "Correct the highlighted fields and try again."
-                        )
+                    mapOf(
+                        "invalidFields" to invalidFields,
+                        "error" to "Correct the highlighted fields and try again."
                     )
                 )
             }
 
             val trips = req.fetchTrips() ?: run {
-                call.respond(
-                    JteContent(
-                        "partials/errorPartial.kte",
-                        mapOf(
-                            "invalidFields" to null,
-                            "error" to "No flights were found with your requested configuration. Please try again with a different combination of parameters."
-                        )
+                call.respondTemplate(
+                    "partials/errorPartial.kte",
+
+                    mapOf(
+                        "invalidFields" to null,
+                        "error" to "No flights were found with your requested configuration. Please try again with a different combination of parameters."
                     )
                 )
 
                 return@get
             }
 
-            call.respond(
-                JteContent(
-                    "partials/flightsPartial.kte",
-                    mapOf("flights" to when (call.request.queryParameters["sorting"]) {
-                        "price" -> trips.sortedBy { it.totalPrice }
-                        "duration" -> trips.sortedBy { it.lengthOfStay }
-                        "priceDesc" -> trips.sortedByDescending { it.totalPrice }
-                        "durationDesc" -> trips.sortedByDescending { it.lengthOfStay }
-                        else -> trips
-                    })
-                )
+            call.respondTemplate(
+                "partials/flightsPartial.kte",
+
+                mapOf("flights" to when (call.request.queryParameters["sorting"]) {
+                    "price" -> trips.sortedBy { it.totalPrice }
+                    "duration" -> trips.sortedBy { it.lengthOfStay }
+                    "priceDesc" -> trips.sortedByDescending { it.totalPrice }
+                    "durationDesc" -> trips.sortedByDescending { it.lengthOfStay }
+                    else -> trips
+                })
             )
         }
 

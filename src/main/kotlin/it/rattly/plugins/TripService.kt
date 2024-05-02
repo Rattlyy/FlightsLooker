@@ -1,6 +1,7 @@
 package it.rattly.plugins
 
 import io.ktor.http.*
+import it.rattly.devMode
 import it.skrape.core.document
 import it.skrape.fetcher.AsyncFetcher
 import it.skrape.fetcher.response
@@ -29,8 +30,11 @@ object TripService {
 
         response {
             val list = mutableListOf<Trip>()
-            CoroutineScope(Dispatchers.IO).launch {
-                File("scraped.html").writeText(document.toString())
+
+            if (devMode) {
+                CoroutineScope(Dispatchers.IO).launch {
+                    File("scraped.html").writeText(document.toString())
+                }
             }
 
             // scraped from azair's website, idk how it works but it works

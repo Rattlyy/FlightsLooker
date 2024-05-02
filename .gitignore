@@ -37,3 +37,4 @@ out/
 /scraped.html
 /jte-classes/
 /airports.json
+/.env
