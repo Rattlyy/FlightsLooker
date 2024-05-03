@@ -1,0 +1,45 @@
+name: Build and push image
+on: [ push ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: "Rattlyy/skrape.it"
+          path: "skrape/"
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Create .env file
+        uses: SpicyPizza/create-envfile@v2.0
+        with:
+          envkey_REGISTRY_HOSTNAME: "ghcr.io"
+          envkey_REGISTRY_USERNAME: "Rattlyy"
+          envkey_REGISTRY_PASSWORD: ${{ secrets.PUSH_IMAGE_TOKEN }}
+          envkey_REGISTRY_NAMESPACE: "rattlyy"
+
+      - name: Build skrape
+        working-directory: skrape/
+        run: ./gradlew publishToMavenLocal --no-daemon
+
+      - name: Build FlightsLooker and push image
+        run: ./gradlew build publishImage --no-daemon
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to production
+        uses: johnbeynon/render-deploy-action@v0.0.8
+        with:
+          service-id: ${{ secrets.RENDER_SERVICE_ID }}
+          api-key: ${{ secrets.RENDER_API_KEY }}
+          wait-for-success: true

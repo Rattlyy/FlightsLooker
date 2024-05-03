@@ -53,6 +53,7 @@ dependencies {
     implementation("it.skrape:skrapeit:1.3.0-alpha.2")
 }
 
+
 ktor {
     docker {
         jreVersion = JavaVersion.VERSION_17
