@@ -5,7 +5,7 @@
 <div class="row" style="margin-left: 1rem; margin-right: 1rem">
     @for (flight in flights)
         <div class="col g-1 gy-4">
-            <div class="card" style="width: 18rem;">
+            <div class="card flight-card" style="width: 18rem;">
                 <div class="card-body">
 
                     <h3 class="card-title">${flight.departure.sourceAirport.name}
@@ -49,6 +49,14 @@
         </div>
     @endfor
 </div>
+
+<style>
+    @media only screen and (max-width: 768px) {
+        .flight-card {
+            width: 100%;
+        }
+    }
+</style>
 
 <script>
     $('.is-invalid').removeClass('is-invalid');
