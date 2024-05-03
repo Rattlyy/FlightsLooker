@@ -1,6 +1,6 @@
 # FlightsLooker
 
-Flight search engine that scrapes it's results from https://azair.net/
+Flight ticket search engine that scrapes it's results from https://azair.net/
 
 Available at https://flightslooker.onrender.com/
 
