@@ -1,5 +1,5 @@
 @import io.ktor.util.*
-@import it.rattly.plugins.Trip
+@import it.rattly.objects.Trip
 @param flights: List<Trip>
 
 <div class="row" style="margin-left: 1rem; margin-right: 1rem">

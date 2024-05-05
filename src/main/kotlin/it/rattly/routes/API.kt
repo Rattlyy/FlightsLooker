@@ -1,14 +1,15 @@
 package it.rattly.routes
 
 import io.ktor.http.*
-import io.ktor.resources.*
 import io.ktor.server.application.*
 import io.ktor.server.resources.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import it.rattly.plugins.*
+import it.rattly.objects.FlightsRequest
+import it.rattly.objects.PLACEHOLDER_TRIP
+import it.rattly.objects.Trip
+import it.rattly.plugins.AirportService
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.*
 
 @OptIn(ExperimentalSerializationApi::class)
@@ -63,55 +64,10 @@ fun Application.configureApi() {
             get("/airports") {
                 call.respond(AirportService.getAirports())
             }
+
+            get("/healthcheck") {
+                call.respond(HttpStatusCode.OK, "ok")
+            }
         }
-    }
-}
-
-@Resource("/flights")
-@Serializable
-class FlightsRequest(
-    private val sourceAirportId: List<Int>? = null,
-    private val destinationAirportId: List<Int>? = null,
-    private val adults: Int? = null,
-    private val children: Int? = null,
-    private val infants: Int? = null,
-) {
-    suspend fun fetchTrips(): MutableList<Trip>? = runCatching {
-        val sourceAirports = sourceAirportId!!.mapNotNull { id -> AirportService.getAirports().find { it.id == id } }
-        val destinationAirports =
-            destinationAirportId!!.mapNotNull { id -> AirportService.getAirports().find { it.id == id } }
-
-        TripService.fetchTrips(
-            Airport(
-                sourceAirports.first().name,
-                sourceAirports.first().code,
-                sourceAirports.takeLast(sourceAirports.size - 1).map { it.code }
-            ),
-
-            Airport(
-                destinationAirports.first().name,
-                destinationAirports.first().code,
-                destinationAirports.takeLast(destinationAirports.size - 1).map { it.code }
-            ),
-
-            adults!!,
-            children!!,
-            infants!!
-        )
-    }.getOrElse {
-        it.printStackTrace()
-        return null
-    }
-
-    fun validate() = mutableListOf<String>().apply {
-        if (sourceAirportId == null) add("sourceAirportId")
-        if (destinationAirportId == null) add("destinationAirportId")
-        if (adults == null) add("adults")
-        if (children == null) add("children")
-        if (infants == null) add("infants")
-
-        if ((adults ?: 1) < 0) add("adults")
-        if ((children ?: 1) < 0) add("children")
-        if ((infants ?: 1) < 0) add("infants")
     }
 }

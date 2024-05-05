@@ -7,13 +7,15 @@ import io.ktor.server.resources.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.util.*
+import it.rattly.objects.FlightsRequest
+import it.rattly.objects.PLACEHOLDER_TRIP
+import it.rattly.objects.Trip
 import it.rattly.plugins.AirportService
-import it.rattly.plugins.PLACEHOLDER_TRIP
-import it.rattly.plugins.Trip
 import it.skrape.core.document
 import it.skrape.fetcher.AsyncFetcher
 import it.skrape.fetcher.response
 import it.skrape.fetcher.skrape
+import java.io.File
 
 fun Application.configureFrontend() {
     routing {
@@ -34,10 +36,12 @@ fun Application.configureFrontend() {
                             "User-Agent",
                             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
                         )
+
                         append(
                             "Accept",
                             "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
                         )
+
                         append("Accept-Language", "en-US,en;q=0.9")
                         append("Accept-Encoding", "gzip, deflate, br")
                         append("Origin", "https://azair.eu")
@@ -107,8 +111,10 @@ fun Application.configureFrontend() {
             )
         }
 
-        get("/healthcheck") {
-            call.respond(HttpStatusCode.OK, "ok")
+        if (developmentMode) {
+            get("/dev/scraped") {
+                call.respondFile(File("scraped.html"))
+            }
         }
     }
 }

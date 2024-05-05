@@ -61,6 +61,20 @@
                                value="0">
                     </div>
                 </div>
+
+                <div class="col">
+                    <div class="form-group">
+                        <label for="dates-start">Start</label>
+                        <input class="form-control datepicker-input" type="text" id="dates-start" name="startDate">
+                    </div>
+                </div>
+
+                <div class="col">
+                    <div class="form-group">
+                        <label for="dates-end">End</label>
+                        <input class="form-control datepicker-input" type="text" id="dates-end" name="endDate">
+                    </div>
+                </div>
             </div>
 
             <div class="col-md-12" style="margin-bottom: ${marginSpace}">
@@ -122,6 +136,18 @@
             $("#departureAirport").select2({
                 theme: 'bootstrap-5'
             })
+
+            const start = document.querySelector("#dates-start");
+            const end = document.querySelector("#dates-end");
+
+            new DateRangePicker(start, {
+                inputs: [start, end],
+                buttonClass: 'btn',
+                format: 'dd/mm/yyyy',
+            });
+
+            start.datepicker.setDate(new Date())
+            end.datepicker.setDate(new Date(new Date().setFullYear(new Date().getFullYear() + 1)))
         });
 
         function makeFakeInput() {

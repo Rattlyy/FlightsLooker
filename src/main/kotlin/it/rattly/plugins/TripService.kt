@@ -2,6 +2,8 @@ package it.rattly.plugins
 
 import io.ktor.http.*
 import it.rattly.devMode
+import it.rattly.objects.Flight
+import it.rattly.objects.Trip
 import it.skrape.core.document
 import it.skrape.fetcher.AsyncFetcher
 import it.skrape.fetcher.response
@@ -9,9 +11,10 @@ import it.skrape.fetcher.skrape
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.serialization.Serializable
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.format
+import kotlinx.datetime.format.char
 import java.io.File
-import java.util.*
 import kotlin.math.pow
 import kotlin.math.roundToInt
 
@@ -22,9 +25,11 @@ object TripService {
         adults: Int,
         children: Int,
         infants: Int,
+        startDate: LocalDate,
+        endDate: LocalDate,
     ) = skrape(AsyncFetcher /* uses coroutines */) {
         request {
-            url = buildURL(sourceAirport, destinationAirport, adults, children, infants)
+            url = buildURL(sourceAirport, destinationAirport, adults, children, infants, startDate, endDate)
             timeout = 60 * 1000
         }
 
@@ -114,12 +119,9 @@ object TripService {
         adults: Int,
         children: Int,
         infants: Int,
+        startDate: LocalDate,
+        endDate: LocalDate,
     ): String {
-        val day = Calendar.getInstance().get(Calendar.DAY_OF_WEEK)
-        val month = Calendar.getInstance().get(Calendar.MONTH)
-        val year = Calendar.getInstance().get(Calendar.YEAR)
-        val yearNew = Calendar.getInstance().get(Calendar.YEAR) + 1
-
         return URLBuilder(
             host = "www.azair.eu",
             protocol = URLProtocol.HTTPS,
@@ -156,8 +158,10 @@ object TripService {
             parameters["maxHourOutbound"] = "24:00"
             parameters["minHourInbound"] = "0:00"
             parameters["maxHourInbound"] = "24:00"
-            parameters["depdate"] = "$day.$month.$year"
-            parameters["arrdate"] = "$day.$month.$yearNew"
+            parameters["depdate"] = //"$day.$month.$yearNew"
+                startDate.format(LocalDate.Format { dayOfMonth(); char('.'); monthNumber(); char('.'); year() })
+            parameters["arrdate"] = //"$day.$month.$yearNew"
+                endDate.format(LocalDate.Format { dayOfMonth(); char('.'); monthNumber(); char('.'); year() })
             parameters["minDaysStay"] = "1"
             parameters["maxDaysStay"] = "8"
             parameters["nextday"] = "0"
@@ -191,64 +195,6 @@ object TripService {
         }.buildString()
     }
 }
-
-val PLACEHOLDER_TRIP = Trip(
-    departure = Flight(
-        date = "2023-01-01",
-        sourceAirport = AIRPORT_ANYWHERE,
-        destinationAirport = AIRPORT_ANYWHERE,
-        departureTime = "10:00",
-        arrivalTime = "10:00",
-        duration = "1",
-        price = 1.00,
-        company = "Ryanair",
-        companyIata = "FR",
-        cheapSeats = "1"
-    ),
-    arrival = Flight(
-        date = "2023-01-01",
-        sourceAirport = AIRPORT_ANYWHERE,
-        destinationAirport = AIRPORT_ANYWHERE,
-        departureTime = "10:00",
-        arrivalTime = "10:00",
-        duration = "1",
-        price = 1.00,
-        company = "Ryanair",
-        companyIata = "FR",
-        cheapSeats = "1"
-    ),
-    bookUrls = mapOf(
-        listOf("test") to "https://example.com",
-        listOf("test") to "https://example.com",
-        listOf("test") to "https://example.com",
-        listOf("test") to "https://example.com",
-    ),
-
-    lengthOfStay = 1
-)
-
-@Serializable
-data class Trip(
-    val departure: Flight,
-    val arrival: Flight,
-    val lengthOfStay: Int,
-    val totalPrice: Double = (departure.price + arrival.price).round(2),
-    val bookUrls: Map<List<String>, String>
-)
-
-@Serializable
-data class Flight(
-    val sourceAirport: Airport,
-    val destinationAirport: Airport,
-    val departureTime: String,
-    val arrivalTime: String,
-    val date: String,
-    val duration: String,
-    val price: Double,
-    val company: String,
-    val companyIata: String,
-    val cheapSeats: String
-)
 
 fun Double.round(digits: Int): Double {
     return (this * 10.0.pow(digits)).roundToInt() / 10.0.pow(digits)

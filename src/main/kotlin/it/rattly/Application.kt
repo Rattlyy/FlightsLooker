@@ -10,13 +10,14 @@ import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.request.*
 import io.ktor.server.resources.*
 import io.ktor.server.sse.*
+import io.ktor.util.*
 import it.rattly.plugins.configureJte
 import it.rattly.routes.configureApi
 import it.rattly.routes.configureFrontend
 import kotlinx.serialization.json.Json
 import org.slf4j.event.Level
 
-val devMode by lazy { System.getProperty("io.ktor.development") == "true" }
+val devMode get() = PlatformUtils.IS_DEVELOPMENT_MODE
 
 fun main() {
     embeddedServer(CIO, port = 8080, host = "0.0.0.0", module = Application::module)

@@ -30,6 +30,7 @@ repositories {
 }
 
 dependencies {
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.0-RC.2")
     implementation("io.ktor:ktor-server-cors")
     implementation("io.ktor:ktor-server-core-jvm")
     implementation("io.ktor:ktor-server-resources")
