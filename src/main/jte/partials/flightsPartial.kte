@@ -12,17 +12,17 @@
                         - ${flight.departure.destinationAirport.name}</h3>
                     <p class="card-text">${flight.departure.date}</p>
                     <p class="card-text">${flight.departure.duration}</p>
-                    <p class="card-text">${flight.departure.price}</p>
+                    <p class="card-text">${flight.departure.price}€</p>
                     <p class="card-text iata${flight.departure.companyIata} iata">${flight.departure.company}</p>
-                    <p class="card-text">${flight.departure.cheapSeats}</p>
+                    <p class="card-text">Seats left: ${flight.departure.cheapSeats}</p>
 
                     <h3 class="card-title">${flight.arrival.sourceAirport.name}
                         - ${flight.arrival.destinationAirport.name}</h3>
                     <p class="card-text">${flight.arrival.date}</p>
                     <p class="card-text">${flight.arrival.duration}</p>
-                    <p class="card-text">${flight.arrival.price}</p>
+                    <p class="card-text">${flight.arrival.price}€</p>
                     <p class="card-text iata${flight.arrival.companyIata} iata">${flight.arrival.company}</p>
-                    <p class="card-text">${flight.arrival.cheapSeats}</p>
+                    <p class="card-text">Seats left: ${flight.arrival.cheapSeats}</p>
 
                     <h5 class="card-title">Total Price</h5>
                     <p class="card-text" style="font-size: 3rem; font-weight: bold;">${flight.totalPrice}€</p>

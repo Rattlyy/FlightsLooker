@@ -29,6 +29,7 @@ class FlightsRequest(
 
     private val startDate: LocalDate? = null,
     private val endDate: LocalDate? = null,
+    private val direct: Boolean? = false,
 ) {
     suspend fun fetchTrips(): MutableList<Trip>? = runCatching {
         val sourceAirports = sourceAirportId!!.mapNotNull { id -> AirportService.getAirports().find { it.id == id } }
@@ -52,7 +53,8 @@ class FlightsRequest(
             children!!,
             infants!!,
             startDate!!,
-            endDate!!
+            endDate!!,
+            direct!!
         )
     }.getOrElse {
         it.printStackTrace()

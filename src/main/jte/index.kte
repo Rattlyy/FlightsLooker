@@ -30,9 +30,16 @@
                             <option value="${airport.id}">${airport.toString()}</option>
                         @endfor
                     </select>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="" id="anywhere">
-                        <label class="form-check-label" for="anywhere">Anywhere</label>
+                    <div class="row" style="padding-left: 12px">
+                        <div class="form-check col">
+                            <input class="form-check-input" type="checkbox" value="" id="anywhere">
+                            <label class="form-check-label" for="anywhere">Anywhere</label>
+                        </div>
+
+                        <div class="form-check col">
+                            <input class="form-check-input" type="checkbox" value="true" name="direct" id="direct">
+                            <label class="form-check-label" for="direct">Direct flights only</label>
+                        </div>
                     </div>
                 </div>
             </div>
