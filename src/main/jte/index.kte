@@ -1,5 +1,5 @@
-@import it.rattly.plugins.Airport
-@import it.rattly.plugins.AIRPORT_ANYWHERE
+@import it.rattly.plugins.cacheable.impl.Airport
+@import it.rattly.plugins.cacheable.impl.AIRPORT_ANYWHERE
 @param airportsWithEverywhere: List<Airport>
 @template.layouts.layout("FlightsLookup", content = @`
     <form id="searchForm" hx-get="/flights" hx-target="#results" hx-indicator="#loading">

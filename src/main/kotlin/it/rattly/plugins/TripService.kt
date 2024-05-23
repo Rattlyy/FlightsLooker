@@ -4,6 +4,9 @@ import io.ktor.http.*
 import it.rattly.devMode
 import it.rattly.objects.Flight
 import it.rattly.objects.Trip
+import it.rattly.plugins.cacheable.impl.AIRPORT_ANYWHERE
+import it.rattly.plugins.cacheable.impl.Airport
+import it.rattly.plugins.cacheable.impl.AirportCache
 import it.skrape.core.document
 import it.skrape.fetcher.AsyncFetcher
 import it.skrape.fetcher.response
@@ -66,8 +69,8 @@ object TripService {
                             Trip(
                                 departure = Flight(
                                     date = deptDate[0],
-                                    sourceAirport = AirportService.getByCode(aerCode[0]) ?: AIRPORT_ANYWHERE,
-                                    destinationAirport = AirportService.getByCode(aerCode[1]) ?: AIRPORT_ANYWHERE,
+                                    sourceAirport = AirportCache.code(aerCode[0]) ?: AIRPORT_ANYWHERE,
+                                    destinationAirport = AirportCache.code(aerCode[1]) ?: AIRPORT_ANYWHERE,
                                     departureTime = deptTime[1],
                                     arrivalTime = deptTime[3],
                                     duration = duration[0],
@@ -79,8 +82,8 @@ object TripService {
 
                                 arrival = Flight(
                                     date = deptDate[1],
-                                    sourceAirport = AirportService.getByCode(aerCode[4]) ?: AIRPORT_ANYWHERE,
-                                    destinationAirport = AirportService.getByCode(aerCode[5]) ?: AIRPORT_ANYWHERE,
+                                    sourceAirport = AirportCache.code(aerCode[4]) ?: AIRPORT_ANYWHERE,
+                                    destinationAirport = AirportCache.code(aerCode[5]) ?: AIRPORT_ANYWHERE,
                                     departureTime = arrTime[0],
                                     arrivalTime = arrTime[2],
                                     company = airlines[1],
@@ -99,7 +102,7 @@ object TripService {
                                                 ?.replace(",'", ",")
                                                 ?.split("',")
                                                 ?.filter { it.toIntOrNull() == null }
-                                                ?.mapNotNull { AirportService.getByCode(it) }
+                                                ?.mapNotNull { AirportCache.code(it) }
                                                 ?.joinToString(" -> ")
                                                 ?: ""
                                             )

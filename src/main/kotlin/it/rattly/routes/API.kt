@@ -8,7 +8,7 @@ import io.ktor.server.routing.*
 import it.rattly.objects.FlightsRequest
 import it.rattly.objects.PLACEHOLDER_TRIP
 import it.rattly.objects.Trip
-import it.rattly.plugins.AirportService
+import it.rattly.plugins.cacheable.impl.AirportCache
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.*
 
@@ -62,7 +62,7 @@ fun Application.configureApi() {
             }
 
             get("/airports") {
-                call.respond(AirportService.getAirports())
+                call.respond(AirportCache.all())
             }
 
             get("/healthcheck") {

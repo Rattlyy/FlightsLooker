@@ -1,8 +1,10 @@
 package it.rattly.objects
 
-import it.rattly.plugins.AIRPORT_ANYWHERE
-import it.rattly.plugins.Airport
+import it.rattly.plugins.cacheable.impl.AIRPORT_ANYWHERE
+import it.rattly.plugins.cacheable.impl.Airport
+import it.rattly.plugins.cacheable.impl.IconCache
 import it.rattly.plugins.round
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -26,7 +28,9 @@ data class Flight(
     val company: String,
     val companyIata: String,
     val cheapSeats: String
-)
+) {
+    fun iconCss() = runBlocking { IconCache.all() }.find { it.code == companyIata }?.css ?: ""
+}
 
 val PLACEHOLDER_TRIP = Trip(
     departure = Flight(

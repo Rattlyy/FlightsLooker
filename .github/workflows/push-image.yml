@@ -1,15 +1,10 @@
 name: Build and push image
-on: [ push ]
+on: [ workflow_call ] # replace with push once skrape is fixed
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/checkout@v4
-        with:
-          repository: "Rattlyy/skrape.it"
-          path: "skrape/"
-
       - uses: actions/setup-java@v4
         with:
           java-version: '17'
@@ -25,10 +20,6 @@ jobs:
           envkey_REGISTRY_USERNAME: "Rattlyy"
           envkey_REGISTRY_PASSWORD: ${{ secrets.PUSH_IMAGE_TOKEN }}
           envkey_REGISTRY_NAMESPACE: "rattlyy"
-
-      - name: Build skrape
-        working-directory: skrape/
-        run: ./gradlew publishToMavenLocal --no-daemon
 
       - name: Build FlightsLooker and push image
         run: ./gradlew build publishImage --no-daemon

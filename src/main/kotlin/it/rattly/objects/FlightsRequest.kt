@@ -3,9 +3,9 @@
 package it.rattly.objects
 
 import io.ktor.resources.*
-import it.rattly.plugins.Airport
-import it.rattly.plugins.AirportService
 import it.rattly.plugins.TripService
+import it.rattly.plugins.cacheable.impl.Airport
+import it.rattly.plugins.cacheable.impl.AirportCache
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.format
 import kotlinx.datetime.format.char
@@ -32,9 +32,9 @@ class FlightsRequest(
     private val direct: Boolean? = false,
 ) {
     suspend fun fetchTrips(): MutableList<Trip>? = runCatching {
-        val sourceAirports = sourceAirportId!!.mapNotNull { id -> AirportService.getAirports().find { it.id == id } }
+        val sourceAirports = sourceAirportId!!.mapNotNull { id -> AirportCache.all().find { it.id == id } }
         val destinationAirports =
-            destinationAirportId!!.mapNotNull { id -> AirportService.getAirports().find { it.id == id } }
+            destinationAirportId!!.mapNotNull { id -> AirportCache.all().find { it.id == id } }
 
         TripService.fetchTrips(
             Airport(

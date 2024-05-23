@@ -10,7 +10,7 @@ import io.ktor.util.*
 import it.rattly.objects.FlightsRequest
 import it.rattly.objects.PLACEHOLDER_TRIP
 import it.rattly.objects.Trip
-import it.rattly.plugins.AirportService
+import it.rattly.plugins.cacheable.impl.AirportCache
 import it.skrape.core.document
 import it.skrape.fetcher.AsyncFetcher
 import it.skrape.fetcher.response
@@ -20,7 +20,7 @@ import java.io.File
 fun Application.configureFrontend() {
     routing {
         get("/") {
-            call.respondTemplate("index.kte", mapOf("airportsWithEverywhere" to AirportService.getAirports()))
+            call.respondTemplate("index.kte", mapOf("airportsWithEverywhere" to AirportCache.all()))
         }
 
         get("/doBooking") {
