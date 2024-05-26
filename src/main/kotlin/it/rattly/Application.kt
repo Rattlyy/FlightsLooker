@@ -4,13 +4,16 @@ import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.cio.*
 import io.ktor.server.engine.*
+import io.ktor.server.http.content.*
 import io.ktor.server.plugins.autohead.*
 import io.ktor.server.plugins.callloging.*
 import io.ktor.server.plugins.compression.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.request.*
 import io.ktor.server.resources.*
+import io.ktor.server.routing.*
 import io.ktor.server.sse.*
+import io.ktor.server.webjars.*
 import io.ktor.util.*
 import it.rattly.plugins.configureJte
 import it.rattly.routes.configureApi
@@ -26,6 +29,8 @@ fun main() {
 }
 
 fun Application.module() {
+    // Webjars
+    install(Webjars)
     // for render's checks
     install(AutoHeadResponse)
     // for HMR
@@ -48,6 +53,10 @@ fun Application.module() {
     install(Compression) {
         gzip()
         deflate()
+    }
+
+    routing {
+        staticResources("/assets", "static")
     }
 
     configureJte()

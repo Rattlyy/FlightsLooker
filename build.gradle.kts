@@ -24,6 +24,7 @@ application {
 }
 
 repositories {
+    //TODO: remove when skrapeit is published on maven central
     mavenLocal()
     mavenCentral()
     maven("https://maven.pkg.jetbrains.space/public/p/ktor/eap")
@@ -43,23 +44,26 @@ dependencies {
     implementation("io.ktor:ktor-server-jte")
     implementation("io.ktor:ktor-server-auto-head-response")
     implementation("io.ktor:ktor-server-sse-jvm")
+    implementation("io.ktor:ktor-server-webjars")
     implementation("com.github.kittinunf.fuel:fuel:2.+")
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
     implementation("gg.jte:jte:$jteVersion")
     implementation("gg.jte:jte-watcher:$jteVersion")
     implementation("gg.jte:jte-kotlin:$jteVersion")
-
-    // PSA: this is a patched version of skrapeit, it's not published on maven central yet
-    // TODO: https://github.com/skrapeit/skrape.it/pull/239
-    // TODO: fix when jitpack fixes itself
     implementation("it.skrape:skrapeit:1.3.0-alpha.2")
+
+    runtimeOnly("org.webjars.npm:bootstrap:5.3.3")
+    runtimeOnly("org.webjars.npm:select2:4.1.0-rc.0")
+    runtimeOnly("org.webjars.npm:select2-bootstrap-5-theme:1.3.0")
+    runtimeOnly("org.webjars.npm:vanillajs-datepicker:1.3.4")
+    runtimeOnly("org.webjars.npm:jquery:4.0.0-beta")
+    runtimeOnly("org.webjars.npm:htmx.org:2.0.0-beta3")
 }
 
 jib {
     from {
         platforms {
             platform { os = "linux"; architecture = "arm64" }
-            platform { os = "linux"; architecture = "amd64" }
         }
     }
 }
