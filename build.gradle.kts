@@ -55,6 +55,14 @@ dependencies {
     implementation("it.skrape:skrapeit:1.3.0-alpha.2")
 }
 
+jib {
+    from {
+        platforms {
+            platform { os = "linux"; architecture = "arm64" }
+            platform { os = "linux"; architecture = "amd64" }
+        }
+    }
+}
 
 ktor {
     docker {
