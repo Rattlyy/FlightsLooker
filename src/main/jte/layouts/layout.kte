@@ -41,6 +41,8 @@
     <script src="webjars/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <!-- HTMX -->
     <script src="webjars/htmx.org/dist/htmx.min.js"></script>
+    <!-- tracking -->
+    <script defer data-domain="flights.gmmz.dev" src="https://plausible.gmmz.dev/js/script.js"></script>
 
     ${additionalHead}
 </head>
